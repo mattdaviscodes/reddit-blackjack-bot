@@ -40,7 +40,10 @@ class Dealer(object):
             self.dealer_hit()
 
     def display_hands(self):
-        print("Dealer: {}\nPlayer: {}".format(self.dealer_hand, self.player_hand))
+        print("Dealer: {}\n{}\n\nPlayer: {}\n{}\n".format(self.dealer_hand.get_hand_value(),
+                                                      self.dealer_hand.get_hand_ascii_art(),
+                                                      self.player_hand.get_hand_value(),
+                                                      self.player_hand.get_hand_ascii_art()))
 
     def hand_complete(self):
         if self.dealer_stays:
@@ -67,7 +70,6 @@ class Dealer(object):
 
 
 class Hand(object):
-
     def __init__(self):
         self.cards = []
 
@@ -75,7 +77,16 @@ class Hand(object):
         return sum([card.value for card in self.cards])
 
     def get_hand_ascii_art(self):
-        pass
+        line1 = ''
+        line2 = ''
+        line3 = ''
+        line4 = ''
+        for card in self.cards:
+            line1 += ' __ '
+            line2 += '|  |'
+            line3 += '|{}{}|'.format(card.symbol, card.suit)
+            line4 += '|__|'
+        return '\n'.join([line1, line2, line3, line4])
 
     def has_ace(self):
         for card in self.cards:
@@ -94,11 +105,9 @@ class Hand(object):
         return "{} - {}".format(self.get_hand_value(), '|'.join([str(card) for card in self.cards]))
 
 
-
 class Card(object):
-
     def __init__(self, suit, symbol, value):
-        self.suit = suit    # [C,H,D,S]
+        self.suit = suit  # [C,H,D,S]
         self.symbol = symbol  # [A,2,3,4,5,6,7,8,9,10,J,Q,K]
         self.value = value  # [1,2,3,4,5,6,7,8,9,10,11]
 
@@ -110,8 +119,9 @@ class Card(object):
 
     def __str__(self):
         return "{}{}".format(self.symbol, self.suit)
-class Deck(object):
 
+
+class Deck(object):
     def __init__(self):
         self.deck = [Card('C', 'A', 11),
                      Card('C', '2', 2),
@@ -122,7 +132,7 @@ class Deck(object):
                      Card('C', '7', 7),
                      Card('C', '8', 8),
                      Card('C', '9', 9),
-                     Card('C', '10', 10),
+                     Card('C', 'T', 10),
                      Card('C', 'J', 10),
                      Card('C', 'Q', 10),
                      Card('C', 'K', 10),
@@ -135,7 +145,7 @@ class Deck(object):
                      Card('S', '7', 7),
                      Card('S', '8', 8),
                      Card('S', '9', 9),
-                     Card('S', '10', 10),
+                     Card('S', 'T', 10),
                      Card('S', 'J', 10),
                      Card('S', 'Q', 10),
                      Card('S', 'K', 10),
@@ -148,7 +158,7 @@ class Deck(object):
                      Card('H', '7', 7),
                      Card('H', '8', 8),
                      Card('H', '9', 9),
-                     Card('H', '10', 10),
+                     Card('H', 'T', 10),
                      Card('H', 'J', 10),
                      Card('H', 'Q', 10),
                      Card('H', 'K', 10),
@@ -161,7 +171,7 @@ class Deck(object):
                      Card('D', '7', 7),
                      Card('D', '8', 8),
                      Card('D', '9', 9),
-                     Card('D', '10', 10),
+                     Card('D', 'T', 10),
                      Card('D', 'J', 10),
                      Card('D', 'Q', 10),
                      Card('D', 'K', 10)]
