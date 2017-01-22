@@ -41,9 +41,34 @@ class Dealer(object):
 
     def display_hands(self):
         print("Dealer: {}\n{}\n\nPlayer: {}\n{}\n".format(self.dealer_hand.get_hand_value(),
-                                                      self.dealer_hand.get_hand_ascii_art(),
-                                                      self.player_hand.get_hand_value(),
-                                                      self.player_hand.get_hand_ascii_art()))
+                                                          self.dealer_hand.get_hand_ascii_art(),
+                                                          self.player_hand.get_hand_value(),
+                                                          self.player_hand.get_hand_ascii_art()))
+
+    def get_reddit_reply(self):
+        # TODO: Break into component parts -- e.g. Dealer, Player, Reply Prompt, Footer, etc
+        reply = '''
+            Dealer: {}
+
+            {}
+
+            Player: {}
+
+            {}
+
+            Please reply: {}
+
+            ---
+            Other commands:
+
+            * /u/blackjack_bot help
+            * /u/blackjack_bot history
+            * /u/blackjack_bot highscores
+
+            ^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!
+            ^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot
+            '''.format(self.dealer_hand.get_hand_value(), self.dealer_hand.get_hand_ascii_art(),
+                       self.player_hand.get_hand_value(), self.player_hand.get_hand_ascii_art(), None)
 
     def hand_complete(self):
         if self.dealer_stays:
@@ -77,10 +102,10 @@ class Hand(object):
         return sum([card.value for card in self.cards])
 
     def get_hand_ascii_art(self):
-        line1 = ''
-        line2 = ''
-        line3 = ''
-        line4 = ''
+        line1 = '    '
+        line2 = '    '
+        line3 = '    '
+        line4 = '    '
         for card in self.cards:
             line1 += ' __ '
             line2 += '|  |'
