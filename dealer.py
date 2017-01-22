@@ -70,6 +70,8 @@ class Dealer(object):
             '''.format(self.dealer_hand.get_hand_value(), self.dealer_hand.get_hand_ascii_art(),
                        self.player_hand.get_hand_value(), self.player_hand.get_hand_ascii_art(), None)
 
+        return reply
+
     def hand_complete(self):
         if self.dealer_stays:
             if self.dealer_hand.get_hand_value() > self.player_hand.get_hand_value():
