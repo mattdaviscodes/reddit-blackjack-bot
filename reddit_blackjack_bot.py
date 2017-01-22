@@ -50,9 +50,10 @@ if __name__ == '__main__':
                                 comment.reply(reply)
         except KeyboardInterrupt:
             sys.exit()
-        except praw.exceptions.APIException:
+        except praw.exceptions.APIException as e:
             # TODO: Investigate if this catches only rate limit exceptions, or more
+            print(e)
             print("Rate limit exceeded. Sleeping for 10 minutes.")
-            time.sleep(600)
+            time.sleep(60)
         except Exception as e:
             print("EXCEPTION: {}".format(e))

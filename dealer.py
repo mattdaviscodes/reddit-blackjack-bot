@@ -47,29 +47,9 @@ class Dealer(object):
 
     def get_reddit_reply(self):
         # TODO: Break into component parts -- e.g. Dealer, Player, Reply Prompt, Footer, etc
-        reply = '''
-            Dealer: {}
-
-            {}
-
-            Player: {}
-
-            {}
-
-            Please reply: {}
-
-            ---
-            Other commands:
-
-            * /u/blackjack_bot help
-            * /u/blackjack_bot history
-            * /u/blackjack_bot highscores
-
-            ^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!
-            ^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot
-            '''.format(self.dealer_hand.get_hand_value(), self.dealer_hand.get_hand_ascii_art(),
-                       self.player_hand.get_hand_value(), self.player_hand.get_hand_ascii_art(), None)
-
+        reply = '''Dealer: {}\n\n{}\n\nPlayer: {}\n\n{}\n\nPlease reply: {}\n\n---\nOther commands:\n\n* /u/blackjack_bot help\n* /u/blackjack_bot history\n* /u/blackjack_bot highscores\n\n^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'''.format(
+            self.dealer_hand.get_hand_value(), self.dealer_hand.get_hand_ascii_art(), self.player_hand.get_hand_value(),
+            self.player_hand.get_hand_ascii_art(), None)
         return reply
 
     def hand_complete(self):
