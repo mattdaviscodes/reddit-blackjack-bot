@@ -49,23 +49,30 @@ class Bot(object):
         return game
 
     def run_hit(self, author_id):
-        self.cur.execute('SELECT dealer_hand, player_hand FROM games WHERE user_id = ? and completed_date is null',
-                         (author_id,))
-        dealer_hand, player_hand = self.cur.next()
+        self.cur.execute(
+            'SELECT game_id, dealer_hand, player_hand FROM games WHERE user_id = ? and completed_date is null',
+            (author_id,))
+        game_id, dealer_hand, player_hand = self.cur.next()
         game = Game()
+        game.game_id = game_id
         game.populate_game_from_db(dealer_hand, player_hand)
         game.player_hit()
         return game
 
     def send_reply(self, mention, game):
         reply = self.generate_reply(game)
-        mention.reply(reply)
-        #print reply
+        # mention.reply(reply)
+        print reply
 
     def store_hand_state(self, game, author_id):
-        self.cur.execute('INSERT INTO games (user_id, dealer_hand, player_hand, created_date) VALUES (?,?,?,?)',
-                         (author_id, game.dealer_hand.encode_hand_for_db(), game.player_hand.encode_hand_for_db(),
-                          datetime.now().isoformat()))
+        if game.game_id:
+            self.cur.execute('UPDATE games SET dealer_hand=?, player_hand=? where game_id=?',
+                             (game.dealer_hand.encode_hand_for_db(), game.player_hand.encode_hand_for_db(),
+                              game.game_id))
+        else:
+            self.cur.execute('INSERT INTO games (user_id, dealer_hand, player_hand, created_date) VALUES (?,?,?,?)',
+                             (author_id, game.dealer_hand.encode_hand_for_db(), game.player_hand.encode_hand_for_db(),
+                              datetime.now().isoformat()))
         self.sql.commit()
 
     def generate_reply(self, game):

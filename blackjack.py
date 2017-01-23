@@ -10,6 +10,7 @@ class Game(object):
         self.player_hand = Hand()
         self.player_stays = False
         self.dealer_stays = False
+        self.game_id = None
 
     def deal(self):
         self.deck = Deck().shuffle()
