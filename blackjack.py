@@ -5,16 +5,34 @@ class Game(object):
     ''' A stateless class to store all logic required for running a game of blackjack '''
 
     def __init__(self):
-        self.deck = Deck().shuffle()
+        self.deck = None
         self.dealer_hand = Hand()
         self.player_hand = Hand()
         self.player_stays = False
         self.dealer_stays = False
 
     def deal(self):
+        self.deck = Deck().shuffle()
         for i in xrange(2):
             self.player_hand.cards.append(self.deck.pop())
             self.dealer_hand.cards.append(self.deck.pop())
+
+    def populate_game_from_db(self, dealer_hand_str, player_hand_str):
+        deck = Deck().shuffle()
+        dealer_ids = dealer_hand_str.split('|')
+        player_ids = player_hand_str.split('|')
+
+        for id in dealer_ids:
+            for card in deck:
+                if card.id == id:
+                    self.dealer_hand.cards.append(card)
+        for id in player_ids:
+            for card in deck:
+                if card.id == id:
+                    self.player_hand.cards.append(card)
+        self.deck = [card for card in deck if card not in dealer_ids+player_ids]
+
+
 
     def player_hit(self):
         self.player_hand.cards.append(self.deck.pop())
@@ -111,7 +129,7 @@ class Hand(object):
     def encode_hand_for_db(self):
         return '|'.join([str(card.id) for card in self.cards])
 
-    def decode_hand_from_db(self):
+    def decode_hand_from_db(self, dealer_hand_str, player_hand_str):
         pass
 
     def __repr__(self):
@@ -134,58 +152,58 @@ class Card(object):
 
 class Deck(object):
     def __init__(self):
-        self.deck = [Card('C', 'A', 11, 1),
-                     Card('C', '2', 2, 2),
-                     Card('C', '3', 3, 3),
-                     Card('C', '4', 4, 4),
-                     Card('C', '5', 5, 5),
-                     Card('C', '6', 6, 6),
-                     Card('C', '7', 7, 7),
-                     Card('C', '8', 8, 8),
-                     Card('C', '9', 9,9),
-                     Card('C', 'T', 10, 10),
-                     Card('C', 'J', 10, 11),
-                     Card('C', 'Q', 10, 12),
-                     Card('C', 'K', 10, 13),
-                     Card('S', 'A', 11, 14),
-                     Card('S', '2', 2, 15),
-                     Card('S', '3', 3, 16),
-                     Card('S', '4', 4, 17),
-                     Card('S', '5', 5, 18),
-                     Card('S', '6', 6, 19),
-                     Card('S', '7', 7, 20),
-                     Card('S', '8', 8, 21),
-                     Card('S', '9', 9, 22),
-                     Card('S', 'T', 10, 23),
-                     Card('S', 'J', 10, 24),
-                     Card('S', 'Q', 10, 25),
-                     Card('S', 'K', 10, 26),
-                     Card('H', 'A', 11, 27),
-                     Card('H', '2', 2, 28),
-                     Card('H', '3', 3, 29),
-                     Card('H', '4', 4, 30),
-                     Card('H', '5', 5, 31),
-                     Card('H', '6', 6, 32),
-                     Card('H', '7', 7, 33),
-                     Card('H', '8', 8, 34),
-                     Card('H', '9', 9, 35),
-                     Card('H', 'T', 10, 36),
-                     Card('H', 'J', 10, 37),
-                     Card('H', 'Q', 10, 38),
-                     Card('H', 'K', 10, 39),
-                     Card('D', 'A', 11, 40),
-                     Card('D', '2', 2, 41),
-                     Card('D', '3', 3, 42),
-                     Card('D', '4', 4, 43),
-                     Card('D', '5', 5, 44),
-                     Card('D', '6', 6, 45),
-                     Card('D', '7', 7, 46),
-                     Card('D', '8', 8, 47),
-                     Card('D', '9', 9, 48),
-                     Card('D', 'T', 10, 49),
-                     Card('D', 'J', 10, 50),
-                     Card('D', 'Q', 10, 51),
-                     Card('D', 'K', 10, 52)]
+        self.deck = [Card('C', 'A', 11, 0),
+                     Card('C', '2', 2, 1),
+                     Card('C', '3', 3, 2),
+                     Card('C', '4', 4, 3),
+                     Card('C', '5', 5, 4),
+                     Card('C', '6', 6, 5),
+                     Card('C', '7', 7, 6),
+                     Card('C', '8', 8, 7),
+                     Card('C', '9', 9, 8),
+                     Card('C', 'T', 10, 9),
+                     Card('C', 'J', 10, 10),
+                     Card('C', 'Q', 10, 11),
+                     Card('C', 'K', 10, 12),
+                     Card('S', 'A', 11, 13),
+                     Card('S', '2', 2, 14),
+                     Card('S', '3', 3, 15),
+                     Card('S', '4', 4, 16),
+                     Card('S', '5', 5, 17),
+                     Card('S', '6', 6, 18),
+                     Card('S', '7', 7, 19),
+                     Card('S', '8', 8, 20),
+                     Card('S', '9', 9, 21),
+                     Card('S', 'T', 10, 22),
+                     Card('S', 'J', 10, 23),
+                     Card('S', 'Q', 10, 24),
+                     Card('S', 'K', 10, 25),
+                     Card('H', 'A', 11, 26),
+                     Card('H', '2', 2, 27),
+                     Card('H', '3', 3, 28),
+                     Card('H', '4', 4, 29),
+                     Card('H', '5', 5, 30),
+                     Card('H', '6', 6, 31),
+                     Card('H', '7', 7, 32),
+                     Card('H', '8', 8, 33),
+                     Card('H', '9', 9, 34),
+                     Card('H', 'T', 10, 35),
+                     Card('H', 'J', 10, 36),
+                     Card('H', 'Q', 10, 37),
+                     Card('H', 'K', 10, 38),
+                     Card('D', 'A', 11, 29),
+                     Card('D', '2', 2, 40),
+                     Card('D', '3', 3, 41),
+                     Card('D', '4', 4, 42),
+                     Card('D', '5', 5, 43),
+                     Card('D', '6', 6, 44),
+                     Card('D', '7', 7, 45),
+                     Card('D', '8', 8, 46),
+                     Card('D', '9', 9, 47),
+                     Card('D', 'T', 10, 48),
+                     Card('D', 'J', 10, 59),
+                     Card('D', 'Q', 10, 50),
+                     Card('D', 'K', 10, 51)]
 
     def shuffle(self):
         shuffle(self.deck)

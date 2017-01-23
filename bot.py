@@ -30,11 +30,13 @@ class Bot(object):
             self.sql.commit()
             author_id = self.cur.lastrowid
             game = None
-            if 'deal me in' in mention.body:
+            if 'deal me in' in mention.body.lower():
                 game = self.run_deal()
+            if 'hit' in mention.body.lower():
+                game = self.run_hit()
             if game:
                 self.send_reply(mention, game)
-                self.store_hand_state(game)
+                self.store_hand_state(game, author_id)
             mention.mark_read()
 
     def run_deal(self):
@@ -42,15 +44,18 @@ class Bot(object):
         game.deal()
         return game
 
+    def run_hit(self):
+        pass
+
     def send_reply(self, mention, game):
         reply = self.generate_reply(game)
-        #mention.reply(reply)
+        # mention.reply(reply)
         print reply
 
-    def store_hand_state(self, game):
-        self.cur.execute('INSERT INTO games (dealer_hand, player_hand, created_date) VALUES (?,?,?)',
-                         (game.dealer_hand.encode_hand_for_db(), game.player_hand.encode_hand_for_db(),
-                         datetime.now().isoformat()))
+    def store_hand_state(self, game, author_id):
+        self.cur.execute('INSERT INTO games (user_id, dealer_hand, player_hand, created_date) VALUES (?,?,?,?)',
+                         (author_id, game.dealer_hand.encode_hand_for_db(), game.player_hand.encode_hand_for_db(),
+                          datetime.now().isoformat()))
         self.sql.commit()
 
     def generate_reply(self, game):
@@ -58,6 +63,7 @@ class Bot(object):
             game.dealer_hand.get_hand_value(), game.dealer_hand.get_hand_ascii_art(), game.player_hand.get_hand_value(),
             game.player_hand.get_hand_ascii_art(), None)  # TODO: Implement reply prompts
         return reply
+
 
 if __name__ == '__main__':
     # Connect to or create database
@@ -67,7 +73,8 @@ if __name__ == '__main__':
     cur.execute(
         'CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY, reddit_name TEXT, reddit_fullname TEXT, created_date TEXT)')
     cur.execute(
-        'CREATE TABLE IF NOT EXISTS games(game_id INTEGER PRIMARY KEY, dealer_hand TEXT, player_hand TEXT, created_date TEXT, completed_date TEXT)')
+        'CREATE TABLE IF NOT EXISTS games(game_id INTEGER PRIMARY KEY, user_id INTEGER, dealer_hand TEXT, player_hand TEXT, created_date TEXT, completed_date TEXT, FOREIGN KEY(user_id) REFERENCES users(user_id));')
+    cur.execute('PRAGMA foreign_keys = ON;')
 
     # Connect to reddit
     reddit = praw.Reddit(client_id=config.CLIENT_ID,
@@ -80,7 +87,8 @@ if __name__ == '__main__':
     loops = 0
     while True:
         loops += 1
-        print("Loop {}".format(loops))
+        if loops % 50 == 0:
+            print("Loop {}".format(loops))
         try:
             bot.parse_mentions()
         except KeyboardInterrupt:
