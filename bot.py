@@ -61,8 +61,8 @@ class Bot(object):
 
     def send_reply(self, mention, game):
         reply = self.generate_reply(game)
-        # mention.reply(reply)
-        print reply
+        mention.reply(reply)
+        #print reply
 
     def store_hand_state(self, game, author_id):
         if game.game_id:
