@@ -25,15 +25,19 @@ class Bot(object):
     def parse_mentions(self):
         mentions = list(self.reddit.inbox.unread())
         for mention in mentions:
-            self.cur.execute('INSERT INTO users (reddit_name, reddit_fullname, created_date) VALUES (?,?,?)',
-                             (mention.author.name, mention.author.fullname, datetime.now().isoformat()))
-            self.sql.commit()
-            author_id = self.cur.lastrowid
+            self.cur.execute('SELECT user_id from users where reddit_name=?', (mention.author.name,))
+            try:
+                author_id = self.cur.next()[0]
+            except StopIteration:
+                self.cur.execute('INSERT INTO users (reddit_name, reddit_fullname, created_date) VALUES (?,?,?)',
+                                 (mention.author.name, mention.author.fullname, datetime.now().isoformat()))
+                self.sql.commit()
+                author_id = self.cur.lastrowid
             game = None
             if 'deal me in' in mention.body.lower():
                 game = self.run_deal()
             if 'hit' in mention.body.lower():
-                game = self.run_hit()
+                game = self.run_hit(author_id)
             if game:
                 self.send_reply(mention, game)
                 self.store_hand_state(game, author_id)
@@ -44,13 +48,19 @@ class Bot(object):
         game.deal()
         return game
 
-    def run_hit(self):
-        pass
+    def run_hit(self, author_id):
+        self.cur.execute('SELECT dealer_hand, player_hand FROM games WHERE user_id = ? and completed_date is null',
+                         (author_id,))
+        dealer_hand, player_hand = self.cur.next()
+        game = Game()
+        game.populate_game_from_db(dealer_hand, player_hand)
+        game.player_hit()
+        return game
 
     def send_reply(self, mention, game):
         reply = self.generate_reply(game)
-        # mention.reply(reply)
-        print reply
+        mention.reply(reply)
+        #print reply
 
     def store_hand_state(self, game, author_id):
         self.cur.execute('INSERT INTO games (user_id, dealer_hand, player_hand, created_date) VALUES (?,?,?,?)',
@@ -59,10 +69,28 @@ class Bot(object):
         self.sql.commit()
 
     def generate_reply(self, game):
-        reply = '''Dealer: {}\n\n{}\n\nPlayer: {}\n\n{}\n\nPlease reply: {}\n\n---\nOther commands:\n\n* /u/blackjack_bot help\n* /u/blackjack_bot history\n* /u/blackjack_bot highscores\n\n^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'''.format(
-            game.dealer_hand.get_hand_value(), game.dealer_hand.get_hand_ascii_art(), game.player_hand.get_hand_value(),
-            game.player_hand.get_hand_ascii_art(), None)  # TODO: Implement reply prompts
-        return reply
+        dealer_value = 'Dealer: {}'.format('?' if not game.player_stays else game.dealer_hand.get_hand_value())
+        dealer_ascii = self.generate_hand_ascii_art(game.dealer_hand, dealer=True, player_stays=game.player_stays)
+        player_value = 'Player: {}'.format(game.player_hand.get_hand_value())
+        player_ascii = self.generate_hand_ascii_art(game.player_hand)
+        reply_prompt = 'HIT or STAY'  # TODO
+        footer = 'Other commands:\n\n* /u/blackjack_bot help\n* /u/blackjack_bot history\n* /u/blackjack_bot highscores\n\n^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
+        return '\n\n'.join([dealer_value, dealer_ascii, player_value, player_ascii, reply_prompt, footer])
+
+    def generate_hand_ascii_art(self, hand, dealer=False, player_stays=False):
+        line1 = '    '
+        line2 = '    '
+        line3 = '    '
+        line4 = '    '
+        for i, card in enumerate(hand.cards):
+            line1 += ' __ '
+            line2 += '|  |'
+            if dealer and not player_stays and i == 0:
+                line3 += '|  |'
+            else:
+                line3 += '|{}{}|'.format(card.symbol, card.suit)
+            line4 += '|__|'
+        return '\n'.join([line1, line2, line3, line4])
 
 
 if __name__ == '__main__':
@@ -85,6 +113,7 @@ if __name__ == '__main__':
     bot = Bot(reddit, sql)
 
     loops = 0
+    print('Begin main loop')
     while True:
         loops += 1
         if loops % 50 == 0:

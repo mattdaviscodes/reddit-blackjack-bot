@@ -24,11 +24,11 @@ class Game(object):
 
         for id in dealer_ids:
             for card in deck:
-                if card.id == id:
+                if card.id == int(id):
                     self.dealer_hand.cards.append(card)
         for id in player_ids:
             for card in deck:
-                if card.id == id:
+                if card.id == int(id):
                     self.player_hand.cards.append(card)
         self.deck = [card for card in deck if card not in dealer_ids+player_ids]
 
@@ -101,15 +101,18 @@ class Hand(object):
     def get_hand_value(self):
         return sum([card.value for card in self.cards])
 
-    def get_hand_ascii_art(self):
+    def get_hand_ascii_art(self, dealer=False, ):
         line1 = '    '
         line2 = '    '
         line3 = '    '
         line4 = '    '
-        for card in self.cards:
+        for i, card in enumerate(self.cards):
             line1 += ' __ '
             line2 += '|  |'
-            line3 += '|{}{}|'.format(card.symbol, card.suit)
+            if dealer and i == 0:
+                line3 += '|  |'
+            else:
+                line3 += '|{}{}|'.format(card.symbol, card.suit)
             line4 += '|__|'
         return '\n'.join([line1, line2, line3, line4])
 
@@ -191,7 +194,7 @@ class Deck(object):
                      Card('H', 'J', 10, 36),
                      Card('H', 'Q', 10, 37),
                      Card('H', 'K', 10, 38),
-                     Card('D', 'A', 11, 29),
+                     Card('D', 'A', 11, 39),
                      Card('D', '2', 2, 40),
                      Card('D', '3', 3, 41),
                      Card('D', '4', 4, 42),
@@ -201,10 +204,11 @@ class Deck(object):
                      Card('D', '8', 8, 46),
                      Card('D', '9', 9, 47),
                      Card('D', 'T', 10, 48),
-                     Card('D', 'J', 10, 59),
+                     Card('D', 'J', 10, 49),
                      Card('D', 'Q', 10, 50),
                      Card('D', 'K', 10, 51)]
 
     def shuffle(self):
         shuffle(self.deck)
         return self.deck
+
