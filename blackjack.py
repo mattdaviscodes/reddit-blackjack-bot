@@ -1,7 +1,7 @@
 from random import shuffle
 
 
-class Dealer(object):
+class Game(object):
     ''' A stateless class to store all logic required for running a game of blackjack '''
 
     def __init__(self):
@@ -109,7 +109,7 @@ class Hand(object):
         return False
 
     def encode_hand_for_db(self):
-        return '|'.join([card.id for card in self.cards])
+        return '|'.join([str(card.id) for card in self.cards])
 
     def decode_hand_from_db(self):
         pass
@@ -124,9 +124,6 @@ class Card(object):
         self.symbol = symbol  # [A,2,3,4,5,6,7,8,9,10,J,Q,K]
         self.value = value  # [1,2,3,4,5,6,7,8,9,10,11]
         self.id = id
-
-    def get_ascii_art(self):
-        pass
 
     def __repr__(self):
         return "{}{}".format(self.symbol, self.suit)

@@ -3,13 +3,13 @@ import sys  # Used only for exiting script
 import time
 import sqlite3
 
+from blackjack import Game
+
 try:
     import config
 except ImportError:
     # Handle error if no config.py file found
     pass
-
-from dealer import Dealer
 
 if __name__ == '__main__':
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
                                 # TODO: Check if bot has already responded to this comment
                                 print("Summoned by {} in thread {}. Comment ID: {}".format(comment.author, post.title,
                                                                                            comment.id))
-                                d = Dealer()
+                                d = Game()
                                 d.deal()
                                 reply = d.get_reddit_reply()
                                 comment.reply(reply)
