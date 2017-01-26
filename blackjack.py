@@ -4,59 +4,73 @@ from random import shuffle
 class Game(object):
     ''' A stateless class to store all logic required for running a game of blackjack '''
 
-    def __init__(self):
+    def __init__(self, bet=50):
         self.deck = None
         self.dealer_hand = Hand()
         self.player_hand = Hand()
         self.player_stays = False
         self.dealer_stays = False
         self.game_id = None
+        self.bet = bet
+        self.payout = None
+        self.game_complete = False
 
     def deal(self):
         self.deck = Deck().shuffle()
         for i in xrange(2):
             self.player_hand.cards.append(self.deck.pop())
             self.dealer_hand.cards.append(self.deck.pop())
+        if self.player_hand.get_hand_value() == 21:
+            self.player_hand.blackjack = True
+        if self.dealer_hand.get_hand_value() == 21:
+            self.dealer_hand.blackjack = True
+        self.check_game()
 
-    def populate_game_from_db(self, dealer_hand_str, player_hand_str):
-        deck = Deck().shuffle()
-        dealer_ids = dealer_hand_str.split('|')
-        player_ids = player_hand_str.split('|')
-
-        for id in dealer_ids:
-            for card in deck:
-                if card.id == int(id):
-                    self.dealer_hand.cards.append(card)
-        for id in player_ids:
-            for card in deck:
-                if card.id == int(id):
-                    self.player_hand.cards.append(card)
-        self.deck = [card for card in deck if card not in dealer_ids+player_ids]
-
-
+    def can_hit(self):
+        if len(self.deck) > 0 and not self.player_stays:
+            return True
+        else:
+            return False
 
     def player_hit(self):
         self.player_hand.cards.append(self.deck.pop())
+        self.check_game()
 
     def player_stay(self):
         self.player_stays = True
+        self.check_game()
+
+    def can_double_down(self):
+        if len(self.player_hand.cards) == 2:
+            return True
+        else:
+            return False
 
     def player_double_down(self):
         pass
+
+    def can_split(self):
+        if len(self.player_hand.cards) == 2 and self.player_hand.cards[0].symbol == self.player_hand.cards[0].symbol:
+            return True
+        else:
+            return False
 
     def player_split(self):
         pass
 
     def dealer_hit(self):
         self.dealer_hand.cards.append(self.deck.pop())
+        self.check_game()
 
     def dealer_play(self):
-        if self.dealer_hand.get_hand_value() == 17 and self.dealer_hand.has_ace():
-            self.dealer_hit()
-        elif self.dealer_hand.get_hand_value() >= 17:
-            self.dealer_stays = True
-        else:
-            self.dealer_hit()
+        while not self.game_complete:
+            if self.dealer_hand.get_hand_value() == 17 and self.dealer_hand.has_ace():
+                self.dealer_hit()
+            elif self.dealer_hand.get_hand_value() >= 17:
+                self.dealer_stays = True
+            else:
+                self.dealer_hit()
+            self.check_game()
 
     def display_hands(self):
         print("Dealer: {}\n{}\n\nPlayer: {}\n{}\n".format(self.dealer_hand.get_hand_value(),
@@ -64,40 +78,40 @@ class Game(object):
                                                           self.player_hand.get_hand_value(),
                                                           self.player_hand.get_hand_ascii_art()))
 
-    def get_reddit_reply(self):
-        # TODO: Break into component parts -- e.g. Dealer, Player, Reply Prompt, Footer, etc
-        reply = '''Dealer: {}\n\n{}\n\nPlayer: {}\n\n{}\n\nPlease reply: {}\n\n---\nOther commands:\n\n* /u/blackjack_bot help\n* /u/blackjack_bot history\n* /u/blackjack_bot highscores\n\n^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'''.format(
-            self.dealer_hand.get_hand_value(), self.dealer_hand.get_hand_ascii_art(), self.player_hand.get_hand_value(),
-            self.player_hand.get_hand_ascii_art(), None)
-        return reply
-
-    def hand_complete(self):
+    def check_game(self):
+        if self.player_hand.is_blackjack() or self.dealer_hand.is_blackjack():
+            if self.player_hand.is_blackjack() and self.dealer_hand.is_blackjack():
+                self.payout = self.bet
+            elif self.player_hand.is_blackjack():
+                self.payout = self.bet * 2.5
+            else:
+                self.payout = 0
+            self.game_complete = True
         if self.dealer_stays:
             if self.dealer_hand.get_hand_value() > self.player_hand.get_hand_value():
-                print("Dealer wins.")
+                self.payout = 0
             elif self.dealer_hand.get_hand_value() < self.player_hand.get_hand_value():
-                print("Player wins.")
+                self.payout = self.bet * 2
             else:
-                print("Push.")
-            return True
+                self.payout = self.bet
+            self.game_complete = True
         if self.dealer_hand.get_hand_value() > 21:
-            if self.dealer_hand.devalue_ace():
-                return False
-            else:
-                print("Dealer busts. Player wins.")
-                return True
+            if not self.dealer_hand.devalue_ace():
+                self.payout = self.bet * 2
+                self.game_complete = True
         elif self.player_hand.get_hand_value() > 21:
-            if self.player_hand.devalue_ace():
-                return False
-            else:
-                print("Player busts. Dealer wins.")
-                return True
-        return False
+            if not self.player_hand.devalue_ace():
+                self.payout = 0
+                self.game_complete = True
 
 
 class Hand(object):
     def __init__(self):
         self.cards = []
+        self.blackjack = False
+
+    def is_blackjack(self):
+        return self.blackjack
 
     def get_hand_value(self):
         return sum([card.value for card in self.cards])
@@ -125,16 +139,11 @@ class Hand(object):
 
     def devalue_ace(self):
         for card in self.cards:
-            if card.symbol == 'A':
-                card.value = 1
+            if card.symbol == 'A' and card.value == 11:
+                    card.value = 1
+            if self.get_hand_value() <= 21:
                 return True
         return False
-
-    def encode_hand_for_db(self):
-        return '|'.join([str(card.id) for card in self.cards])
-
-    def decode_hand_from_db(self, dealer_hand_str, player_hand_str):
-        pass
 
     def __repr__(self):
         return "{} - {}".format(self.get_hand_value(), '|'.join([str(card) for card in self.cards]))
@@ -212,4 +221,3 @@ class Deck(object):
     def shuffle(self):
         shuffle(self.deck)
         return self.deck
-

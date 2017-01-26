@@ -1,4 +1,5 @@
 import sqlite3
+import pickle
 from datetime import datetime
 
 
@@ -21,9 +22,8 @@ class BlackjackSQL(object):
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS games (
                                     game_id INTEGER PRIMARY KEY,
                                     user_id INTEGER,
-                                    dealer_hand TEXT,
-                                    player_hand TEXT,
                                     bet INTEGER,
+                                    pickled_game TEXT,
                                     created_date TEXT,
                                     completed_date TEXT,
                                     FOREIGN KEY(user_id) REFERENCES users(user_id));''')
@@ -31,27 +31,59 @@ class BlackjackSQL(object):
 
     def get_user(self, name):
         self.try_insert_new_user(name)
-        query = '''SELECT user_id, reddit_name, bankroll FROM users WHERE reddit_user_name = ?'''
+        query = '''SELECT user_id, reddit_name, bankroll FROM users WHERE reddit_name = ?'''
         self.cursor.execute(query, (name,))
-        id, name, bankroll = self.cursor.fetchone()
-        return User(id, name, bankroll)
+        user_id, name, bankroll = self.cursor.fetchone()
+        game = self.get_current_game(user_id)
+        return User(user_id, name, bankroll, game)
 
     def try_insert_new_user(self, name):
         query = '''SELECT EXISTS (SELECT 1 FROM users WHERE reddit_name = ? LIMIT 1);'''
         self.cursor.execute(query, (name,))  # Returns 1 or 0
-        if not self.cursor.fetchone():
+        user_exists = self.cursor.fetchone()[0]
+        if not user_exists:
             self.cursor.execute('INSERT INTO users (reddit_name, created_date) VALUES (?,?)',
                                 (name, datetime.now().isoformat()))
             self.sql.commit()
 
-    def get_current_game(self, user):
-        pass
+    def get_current_game(self, user_id):
+        query = '''SELECT pickled_game FROM games WHERE user_id = ? and completed_date is null'''
+        self.cursor.execute(query, (user_id,))
+        try:
+            return pickle.loads(self.cursor.fetchone()[0])
+        except TypeError:
+            return None
+
+    def insert_new_game(self, user):
+        self.cursor.execute('INSERT INTO games (user_id, created_date) VALUES (?,?)',
+                            (user.user_id, datetime.now().isoformat()))
+        self.sql.commit()
+        return self.cursor.lastrowid
+
+    def store_hand_state(self, user):
+        if user.game.game_complete:
+            self.cursor.execute('UPDATE games SET pickled_game=?, completed_date=? where game_id=?',
+                                (pickle.dumps(user.game), datetime.now().isoformat(), user.game.game_id))
+        else:
+            self.cursor.execute('UPDATE games SET pickled_game=? where game_id=?',
+                                (pickle.dumps(user.game), user.game.game_id))
+        self.sql.commit()
+
+    def pay_user(self, user):
+        self.cursor.execute('UPDATE users SET bankroll=? where user_id=?',
+                            (user.bankroll + user.game.payout, user.user_id))
+        self.sql.commit()
+
+    def charge_user(self, user):
+        self.cursor.execute('UPDATE users SET bankroll=? where user_id=?',
+                            (user.bankroll - user.game.bet, user.user_id))
+        self.sql.commit()
 
 
 class User(object):
-    def __init__(self, id, name, bankroll):
-        self.id = None
-        self.name = None
-        self.game = None
-        self.bankroll = None
+    def __init__(self, user_id, name, bankroll, game=None):
+        self.user_id = user_id
+        self.name = name
+        self.bankroll = bankroll
+        self.game = game
         self.history = None
