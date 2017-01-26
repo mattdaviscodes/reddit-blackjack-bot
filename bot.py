@@ -16,6 +16,10 @@ except ImportError:
     # Handle error if no config.py file found
     pass
 
+import logging
+
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
 
 class Bot(object):
     def __init__(self, reddit, sql):
@@ -28,6 +32,7 @@ class Bot(object):
             user = sql.get_user(mention.author.name)
             if 'deal me in' in mention.body.lower():
                 if not user.game:
+                    logging.info('Dealing new hand to %s', user.name)
                     user.game = Game()
                     user.game.game_id = self.sql.insert_new_game(user)
                     self.sql.charge_user(user)
@@ -38,31 +43,39 @@ class Bot(object):
             # Need to find "bet" in string, then parse out the following int
             if 'hit' in mention.body.lower():
                 if user.game and user.game.can_hit():
+                    logging.info('%s hits', user.name)
                     user.game.player_hit()
                 else:
+                    logging.info('%s invalid hit', user.name)
                     self.generate_error_message(mention, "Invalid action - Hit not allowed in game state")
             if 'stay' in mention.body.lower():
+                logging.info('%s stays', user.name)
                 if user.game:
                     user.game.player_stay()
                     user.game.dealer_play()
                 else:
+                    logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
             if user.game:
                 mention.reply(self.generate_reply(user.game))
                 # print(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
                 if user.game.game_complete:
+                    logging.info('Game complete. User: %s - Game ID: %s', user.name, user.game.game_id)
                     self.sql.pay_user(user)
                 mention.mark_read()
 
     def generate_reply(self, game):
+        outcome = game.outcome.upper() if game.game_complete else None
+        payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
         dealer_value = 'Dealer: {}'.format('?' if not game.game_complete else game.dealer_hand.get_hand_value())
         dealer_ascii = self.generate_hand_ascii_art(game.dealer_hand, dealer=True, game_complete=game.game_complete)
         player_value = 'Player: {}'.format(game.player_hand.get_hand_value())
         player_ascii = self.generate_hand_ascii_art(game.player_hand)
-        reply_prompt = 'HIT or STAY'  # TODO
-        footer = 'Other commands:\n\n* /u/blackjack_bot help\n* /u/blackjack_bot history\n* /u/blackjack_bot highscores\n\n^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
-        return '\n\n'.join([dealer_value, dealer_ascii, player_value, player_ascii, reply_prompt, footer])
+        reply_prompt = 'HIT or STAY' if not game.game_complete else None
+        footer = '^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
+        return '\n\n'.join(filter(None, [outcome, payout, dealer_value, dealer_ascii, player_value, player_ascii,
+                                         reply_prompt, footer]))
 
     def generate_error_message(self, mention, msg):
         mention.reply(msg)

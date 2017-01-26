@@ -14,6 +14,7 @@ class Game(object):
         self.bet = bet
         self.payout = None
         self.game_complete = False
+        self.outcome = None
 
     def deal(self):
         self.deck = Deck().shuffle()
@@ -82,26 +83,34 @@ class Game(object):
         if self.player_hand.is_blackjack() or self.dealer_hand.is_blackjack():
             if self.player_hand.is_blackjack() and self.dealer_hand.is_blackjack():
                 self.payout = self.bet
+                self.outcome = "push"
             elif self.player_hand.is_blackjack():
                 self.payout = self.bet * 2.5
+                self.outcome = "player blackjack"
             else:
                 self.payout = 0
+                self.outcome = "dealer blackjack"
             self.game_complete = True
         if self.dealer_stays:
             if self.dealer_hand.get_hand_value() > self.player_hand.get_hand_value():
                 self.payout = 0
+                self.outcome = "dealer wins"
             elif self.dealer_hand.get_hand_value() < self.player_hand.get_hand_value():
                 self.payout = self.bet * 2
+                self.outcome = "player wins"
             else:
                 self.payout = self.bet
+                self.outcome = "push"
             self.game_complete = True
         if self.dealer_hand.get_hand_value() > 21:
             if not self.dealer_hand.devalue_ace():
                 self.payout = self.bet * 2
+                self.outcome = "dealer busts"
                 self.game_complete = True
         elif self.player_hand.get_hand_value() > 21:
             if not self.player_hand.devalue_ace():
                 self.payout = 0
+                self.outcome = "player busts"
                 self.game_complete = True
 
 

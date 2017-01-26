@@ -2,6 +2,9 @@ import sqlite3
 import pickle
 from datetime import datetime
 
+import logging
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
 
 class BlackjackSQL(object):
     def __init__(self, filename):
@@ -42,6 +45,7 @@ class BlackjackSQL(object):
         self.cursor.execute(query, (name,))  # Returns 1 or 0
         user_exists = self.cursor.fetchone()[0]
         if not user_exists:
+            logging.info('Creating new user: %s', name)
             self.cursor.execute('INSERT INTO users (reddit_name, created_date) VALUES (?,?)',
                                 (name, datetime.now().isoformat()))
             self.sql.commit()
