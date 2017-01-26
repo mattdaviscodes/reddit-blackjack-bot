@@ -17,6 +17,7 @@ except ImportError:
     pass
 
 import logging
+
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
 
@@ -56,8 +57,8 @@ class Bot(object):
                     logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
             if user.game:
-                # mention.reply(self.generate_reply(user.game))
-                print(self.generate_reply(user.game))
+                mention.reply(self.generate_reply(user.game))
+                # print(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
                 if user.game.game_complete:
                     logging.info('Game complete. User: %s - Game ID: %s', user.name, user.game.game_id)
@@ -66,7 +67,7 @@ class Bot(object):
 
     def generate_reply(self, game):
         outcome = game.outcome.upper() if game.game_complete else None
-        #payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
+        # payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
         payout = None
         dealer_value = 'Dealer: {}'.format('?' if not game.game_complete else game.dealer_hand.get_hand_value())
         dealer_ascii = self.generate_hand_ascii_art(game.dealer_hand, dealer=True, game_complete=game.game_complete)
@@ -78,8 +79,8 @@ class Bot(object):
                                          reply_prompt, footer]))
 
     def generate_error_message(self, mention, msg):
-        # mention.reply(msg)
-        print(msg)
+        mention.reply(msg)
+        # print(msg)
         mention.mark_read()
 
     def generate_hand_ascii_art(self, hand, dealer=False, game_complete=False):
