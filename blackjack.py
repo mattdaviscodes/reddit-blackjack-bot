@@ -12,7 +12,7 @@ class Game(object):
         self.dealer_stays = False
         self.game_id = None
         self.bet = bet
-        self.payout = None
+        self.payout = 0
         self.game_complete = False
         self.outcome = None
 

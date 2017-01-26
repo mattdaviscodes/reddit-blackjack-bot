@@ -17,8 +17,7 @@ except ImportError:
     pass
 
 import logging
-
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
 
 class Bot(object):
@@ -57,8 +56,8 @@ class Bot(object):
                     logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
             if user.game:
-                mention.reply(self.generate_reply(user.game))
-                # print(self.generate_reply(user.game))
+                # mention.reply(self.generate_reply(user.game))
+                print(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
                 if user.game.game_complete:
                     logging.info('Game complete. User: %s - Game ID: %s', user.name, user.game.game_id)
@@ -67,7 +66,8 @@ class Bot(object):
 
     def generate_reply(self, game):
         outcome = game.outcome.upper() if game.game_complete else None
-        payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
+        #payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
+        payout = None
         dealer_value = 'Dealer: {}'.format('?' if not game.game_complete else game.dealer_hand.get_hand_value())
         dealer_ascii = self.generate_hand_ascii_art(game.dealer_hand, dealer=True, game_complete=game.game_complete)
         player_value = 'Player: {}'.format(game.player_hand.get_hand_value())
@@ -78,8 +78,8 @@ class Bot(object):
                                          reply_prompt, footer]))
 
     def generate_error_message(self, mention, msg):
-        mention.reply(msg)
-        # print(msg)
+        # mention.reply(msg)
+        print(msg)
         mention.mark_read()
 
     def generate_hand_ascii_art(self, hand, dealer=False, game_complete=False):
@@ -100,7 +100,7 @@ class Bot(object):
 
 if __name__ == '__main__':
     # Connect to or create database
-    print('Opening SQL Database')
+    logging.info('Opening SQL Database')
     sql = BlackjackSQL('sql.db')
     sql.build_db()
 
@@ -113,19 +113,19 @@ if __name__ == '__main__':
     bot = Bot(reddit, sql)
 
     loops = 0
-    print('Begin main loop')
+    logging.info('Begin main loop')
     while True:
         loops += 1
-        if loops % 50 == 0:
-            print("Loop {}".format(loops))
+        if loops % 100 == 0:
+            logging.info("Loop {}".format(loops))
         try:
             bot.parse_mentions()
         except KeyboardInterrupt:
             sys.exit()
         except praw.exceptions.APIException as e:
             # TODO: Investigate if this catches only rate limit exceptions, or more
-            print(e)
-            print("Rate limit exceeded. Sleeping for 1 minute.")
+            logging.warn(e)
+            logging.warn("Rate limit exceeded. Sleeping for 1 minute.")
             time.sleep(60)
         except Exception as e:
-            print(traceback.format_exc())
+            logging.error(traceback.format_exc())
