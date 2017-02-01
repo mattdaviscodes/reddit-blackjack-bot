@@ -75,6 +75,13 @@ class Bot(object):
                 else:
                     logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
+            if 'double down' in mention.body.lower():
+                logging.info('%s doubles down', user.name)
+                if user.game and user.game.can_double_down():
+                    user.game.player_double_down()
+                else:
+                    logging.info('%s invalid double down', user.name)
+                    self.generate_error_message(mention, "Invalid action - Double down not allowed in game state")
             if user.game:
                 mention.reply(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
