@@ -48,7 +48,9 @@ class Game(object):
             return False
 
     def player_double_down(self):
-        pass
+        # double player's bet
+        self.player_hand.cards.append(self.deck.pop())
+        self.player_stay()
 
     def can_split(self):
         if len(self.player_hand.cards) == 2 and self.player_hand.cards[0].symbol == self.player_hand.cards[0].symbol:
