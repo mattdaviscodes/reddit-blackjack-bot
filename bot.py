@@ -59,9 +59,14 @@ class Bot(object):
                         # Need to validate more here
                         # What if bet is a string? (shouldn't be possible)
                         # What if bet > bankroll? What if bet is negative?
-                        user.game = Game(commands.bet)
+                        if user.bankroll >= commands.bet:
+                            user.game = Game(commands.bet)
+                        else:
+                            self.generate_error_message(mention, "Invalid action - You don't have enough credits for that bet. Try /u/blackjack_bot --recharge")
                     else:
                         user.game = Game()
+                        if user.bankroll < user.game.original_bet:
+                            self.generate_error_message(mention, "Invalid action - You don't have enough credits for that bet. Try /u/blackjack_bot --recharge")
                     user.game.game_id = self.sql.insert_new_game(user)
                     self.sql.charge_user(user)
                     user.game.deal()
@@ -85,7 +90,7 @@ class Bot(object):
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
             elif commands.double_down:
                 logging.info('%s doubles down', user.name)
-                if user.game and user.game.can_double_down():
+                if user.game and user.game.can_double_down() and user.bankroll >= user.game.original_bet:
                     self.sql.charge_user(user)
                     user.game.player_double_down()
                 else:
