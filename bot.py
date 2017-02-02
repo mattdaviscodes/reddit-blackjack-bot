@@ -91,6 +91,9 @@ class Bot(object):
 
     def generate_reply(self, game):
         outcome = game.outcome.upper() if game.game_complete else None
+        bet = 'Bet: {}'.format(game.original_bet)
+        if game.double_down:
+            bet += ' (+{})'.format(game.original_bet)
         # payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
         payout = None
         dealer_value = 'Dealer: {}'.format('?' if not game.game_complete else game.dealer_hand.get_hand_value())
@@ -99,7 +102,7 @@ class Bot(object):
         player_ascii = self.generate_hand_ascii_art(game.player_hand)
         reply_prompt = 'HIT or STAY' if not game.game_complete else None
         footer = '^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
-        return '\n\n'.join(filter(None, [outcome, payout, dealer_value, dealer_ascii, player_value, player_ascii,
+        return '\n\n'.join(filter(None, [outcome, bet, payout, dealer_value, dealer_ascii, player_value, player_ascii,
                                          reply_prompt, footer]))
 
     def generate_error_message(self, mention, msg):

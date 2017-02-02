@@ -11,7 +11,9 @@ class Game(object):
         self.player_stays = False
         self.dealer_stays = False
         self.game_id = None
+        self.original_bet = bet
         self.bet = bet
+        self.double_down = False
         self.payout = 0
         self.game_complete = False
         self.outcome = None
@@ -48,6 +50,7 @@ class Game(object):
             return False
 
     def player_double_down(self):
+        self.double_down = True
         self.bet *= 2
         self.player_hand.cards.append(self.deck.pop())
         self.player_stay()
