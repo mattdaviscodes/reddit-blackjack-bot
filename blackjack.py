@@ -48,7 +48,7 @@ class Game(object):
             return False
 
     def player_double_down(self):
-        # double player's bet
+        self.bet *= 2
         self.player_hand.cards.append(self.deck.pop())
         self.player_stay()
 
