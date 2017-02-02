@@ -63,21 +63,21 @@ class Bot(object):
                     self.generate_error_message(mention, "Invalid action - user already has game active")
             # Write logic for variable bets here
             # Need to find "bet" in string, then parse out the following int
-            if 'hit' in mention.body.lower():
+            elif commands.hit:
                 if user.game and user.game.can_hit():
                     logging.info('%s hits', user.name)
                     user.game.player_hit()
                 else:
                     logging.info('%s invalid hit', user.name)
                     self.generate_error_message(mention, "Invalid action - Hit not allowed in game state")
-            if 'stay' in mention.body.lower():
+            elif commands.stay:
                 logging.info('%s stays', user.name)
                 if user.game:
                     user.game.player_stay()
                 else:
                     logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
-            if 'double down' in mention.body.lower():
+            elif commands.double_down:
                 logging.info('%s doubles down', user.name)
                 if user.game and user.game.can_double_down():
                     self.sql.charge_user(user)
@@ -85,6 +85,7 @@ class Bot(object):
                 else:
                     logging.info('%s invalid double down', user.name)
                     self.generate_error_message(mention, "Invalid action - Double down not allowed in game state")
+
             if user.game:
                 mention.reply(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
