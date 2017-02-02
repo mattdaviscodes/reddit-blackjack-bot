@@ -13,3 +13,10 @@ cmd_parser.add_argument('-dd', '--doubledown', '--double', dest='double_down', a
 cmd_parser.add_argument('-sp', '--split', action='store_true', help='issue a split command - CURRENTLY INOPERABLE')
 cmd_parser.add_argument('--history', action='store_true', help='display user hand history - CURRENTLY INOPERABLE')
 cmd_parser.add_argument('--highscores', '--leaderboard', dest='high_scores', action='store_true', help='display the highest scoring users')
+
+#cmd = raw_input("Command: ")
+cmd = '--Deal'
+
+cmd_args, unknown = cmd_parser.parse_known_args(cmd.split())
+print cmd_args
+print unknown

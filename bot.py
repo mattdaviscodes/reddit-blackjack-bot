@@ -48,6 +48,9 @@ class Bot(object):
             if meta_args.test and mention.author.name != 'Davism72':
                 continue
 
+            # Parse commands from user's comment
+            commands, other = cmd_parser.parse_known_args(mention.body.lower())
+
             user = sql.get_user(mention.author.name)
             if 'deal me in' in mention.body.lower():
                 if not user.game:
