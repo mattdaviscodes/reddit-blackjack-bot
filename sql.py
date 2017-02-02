@@ -83,6 +83,9 @@ class BlackjackSQL(object):
                             (user.bankroll - user.game.original_bet, user.user_id))
         self.sql.commit()
 
+        # Make sure to update the User model to avoid problems with double downs
+        user.bankroll -= user.game.original_bet
+
 
 class User(object):
     def __init__(self, user_id, name, bankroll, game=None):
