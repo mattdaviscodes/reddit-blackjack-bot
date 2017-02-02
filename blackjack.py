@@ -44,6 +44,7 @@ class Game(object):
         self.dealer_play()
 
     def can_double_down(self):
+        # Need to check if player has enough funds also
         if len(self.player_hand.cards) == 2:
             return True
         else:
@@ -85,6 +86,7 @@ class Game(object):
                                                           self.player_hand.get_hand_ascii_art()))
 
     def check_game(self):
+        # Check for blackjacks
         if self.player_hand.is_blackjack() or self.dealer_hand.is_blackjack():
             if self.player_hand.is_blackjack() and self.dealer_hand.is_blackjack():
                 self.payout = self.bet
@@ -96,6 +98,11 @@ class Game(object):
                 self.payout = 0
                 self.outcome = "dealer blackjack"
             self.game_complete = True
+
+        # If either hand is over 21, attempt to devalue any aces
+        self.player_hand.devalue_ace()
+        self.dealer_hand.devalue_ace()
+
         if self.dealer_stays:
             if self.dealer_hand.get_hand_value() > self.player_hand.get_hand_value():
                 self.payout = 0
@@ -108,15 +115,13 @@ class Game(object):
                 self.outcome = "push"
             self.game_complete = True
         if self.dealer_hand.get_hand_value() > 21:
-            if not self.dealer_hand.devalue_ace():
-                self.payout = self.bet * 2
-                self.outcome = "dealer busts"
-                self.game_complete = True
+            self.payout = self.bet * 2
+            self.outcome = "dealer busts"
+            self.game_complete = True
         elif self.player_hand.get_hand_value() > 21:
-            if not self.player_hand.devalue_ace():
-                self.payout = 0
-                self.outcome = "player busts"
-                self.game_complete = True
+            self.payout = 0
+            self.outcome = "player busts"
+            self.game_complete = True
 
 
 class Hand(object):
@@ -156,8 +161,7 @@ class Hand(object):
             if card.symbol == 'A' and card.value == 11:
                     card.value = 1
             if self.get_hand_value() <= 21:
-                return True
-        return False
+                break
 
     def __repr__(self):
         return "{} - {}".format(self.get_hand_value(), '|'.join([str(card) for card in self.cards]))
