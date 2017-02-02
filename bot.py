@@ -55,7 +55,13 @@ class Bot(object):
             if commands.deal:
                 if not user.game:
                     logging.info('Dealing new hand to %s', user.name)
-                    user.game = Game()
+                    if commands.bet:
+                        # Need to validate more here
+                        # What if bet is a string? (shouldn't be possible)
+                        # What if bet > bankroll? What if bet is negative?
+                        user.game = Game(commands.bet)
+                    else:
+                        user.game = Game()
                     user.game.game_id = self.sql.insert_new_game(user)
                     self.sql.charge_user(user)
                     user.game.deal()
