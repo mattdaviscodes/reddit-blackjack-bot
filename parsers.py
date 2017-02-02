@@ -12,4 +12,4 @@ cmd_parser.add_argument('-s', '--stay', action='store_true', help='issue a stay 
 cmd_parser.add_argument('-dd', '--doubledown', '--double', dest='double_down', action='store_true', help='issue a double down command')
 cmd_parser.add_argument('-sp', '--split', action='store_true', help='issue a split command - CURRENTLY INOPERABLE')
 cmd_parser.add_argument('--history', action='store_true', help='display user hand history - CURRENTLY INOPERABLE')
-cmd_parser.add_argument('--highscores', '--leaderboard', action='store_true', help='display the highest scoring users')
+cmd_parser.add_argument('--highscores', '--leaderboard', dest='high_scores', action='store_true', help='display the highest scoring users')
