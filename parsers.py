@@ -15,7 +15,7 @@ cmd_parser.add_argument('--history', action='store_true', help='display user han
 cmd_parser.add_argument('--highscores', '--leaderboard', dest='high_scores', action='store_true', help='display the highest scoring users')
 
 #cmd = raw_input("Command: ")
-cmd = '--Deal'
+cmd = '--deal'
 
 cmd_args, unknown = cmd_parser.parse_known_args(cmd.split())
 print cmd_args

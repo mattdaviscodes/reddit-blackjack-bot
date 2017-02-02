@@ -49,10 +49,10 @@ class Bot(object):
                 continue
 
             # Parse commands from user's comment
-            commands, other = cmd_parser.parse_known_args(mention.body.lower())
+            commands, other = cmd_parser.parse_known_args(mention.body.lower().split())
 
             user = sql.get_user(mention.author.name)
-            if 'deal me in' in mention.body.lower():
+            if commands.deal:
                 if not user.game:
                     logging.info('Dealing new hand to %s', user.name)
                     user.game = Game()
