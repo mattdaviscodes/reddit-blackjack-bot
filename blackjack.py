@@ -158,10 +158,11 @@ class Hand(object):
 
     def devalue_ace(self):
         for card in self.cards:
-            if card.symbol == 'A' and card.value == 11:
-                    card.value = 1
             if self.get_hand_value() <= 21:
                 break
+            elif card.symbol == 'A' and card.value == 11:
+                card.value = 1
+
 
     def __repr__(self):
         return "{} - {}".format(self.get_hand_value(), '|'.join([str(card) for card in self.cards]))
