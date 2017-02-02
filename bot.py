@@ -10,7 +10,6 @@ from blackjack import Game
 from sql import BlackjackSQL
 from parsers import meta_args, cmd_parser
 
-
 try:
     import config
 except ImportError:
@@ -18,6 +17,7 @@ except ImportError:
     pass
 
 import logging
+
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
 # Should create a custom logger and substitute it with all praw replies
@@ -92,35 +92,39 @@ class Bot(object):
                     logging.info('%s invalid double down', user.name)
                     self.generate_error_message(mention, "Invalid action - Double down not allowed in game state")
             elif commands.high_scores:
-                self.generate_error_message(mention, "Invalid action - High scores function not yet implemented. Sorry!")
+                self.generate_error_message(mention,
+                                            "Invalid action - High scores function not yet implemented. Sorry!")
             elif commands.history:
                 self.generate_error_message(mention, "Invalid action - History function not yet implemented. Sorry!")
             elif commands.split:
                 self.generate_error_message(mention, "Invalid action - Split function not yet implemented. Sorry!")
 
             if user.game:
-                mention.reply(self.generate_reply(user.game))
-                self.sql.store_hand_state(user)
                 if user.game.game_complete:
                     logging.info('Game complete. User: %s - Game ID: %s', user.name, user.game.game_id)
                     self.sql.pay_user(user)
+                mention.reply(self.generate_reply(user))
+                self.sql.store_hand_state(user)
                 mention.mark_read()
 
-    def generate_reply(self, game):
-        outcome = game.outcome.upper() if game.game_complete else None
-        bet = 'Bet: {}'.format(game.original_bet)
-        if game.double_down:
-            bet += ' (+{})'.format(game.original_bet)
+    def generate_reply(self, user):
+        outcome = user.game.outcome.upper() if user.game.game_complete else None
+        bet = 'Bet: {}'.format(user.game.original_bet)
+        if user.game.double_down:
+            bet += ' (+{})'.format(user.game.original_bet)
         # payout = "Payout: {}".format(game.payout - game.bet) if game.payout - game.bet > 0 else None
         payout = None
-        dealer_value = 'Dealer: {}'.format('?' if not game.game_complete else game.dealer_hand.get_hand_value())
-        dealer_ascii = self.generate_hand_ascii_art(game.dealer_hand, dealer=True, game_complete=game.game_complete)
-        player_value = 'Player: {}'.format(game.player_hand.get_hand_value())
-        player_ascii = self.generate_hand_ascii_art(game.player_hand)
-        reply_prompt = 'HIT or STAY' if not game.game_complete else None
+        bankroll = 'Bankroll: {}'.format(user.bankroll)
+        dealer_value = 'Dealer: {}'.format(
+            '?' if not user.game.game_complete else user.game.dealer_hand.get_hand_value())
+        dealer_ascii = self.generate_hand_ascii_art(user.game.dealer_hand, dealer=True,
+                                                    game_complete=user.game.game_complete)
+        player_value = '/u/{}: {}'.format(user.name, user.game.player_hand.get_hand_value())
+        player_ascii = self.generate_hand_ascii_art(user.game.player_hand)
+        reply_prompt = '--hit or --stay' if not user.game.game_complete else None
         footer = '^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
-        return '\n\n'.join(filter(None, [outcome, bet, payout, dealer_value, dealer_ascii, player_value, player_ascii,
-                                         reply_prompt, footer]))
+        return '\n\n'.join(filter(None, [outcome, bet, payout, bankroll, dealer_value, dealer_ascii, player_value,
+                                         player_ascii, reply_prompt, footer]))
 
     def generate_error_message(self, mention, msg):
         mention.reply(msg)
