@@ -91,6 +91,12 @@ class Bot(object):
                 else:
                     logging.info('%s invalid double down', user.name)
                     self.generate_error_message(mention, "Invalid action - Double down not allowed in game state")
+            elif commands.high_scores:
+                self.generate_error_message(mention, "Invalid action - High scores function not yet implemented. Sorry!")
+            elif commands.history:
+                self.generate_error_message(mention, "Invalid action - History function not yet implemented. Sorry!")
+            elif commands.split:
+                self.generate_error_message(mention, "Invalid action - Split function not yet implemented. Sorry!")
 
             if user.game:
                 mention.reply(self.generate_reply(user.game))
