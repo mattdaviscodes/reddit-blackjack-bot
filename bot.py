@@ -8,7 +8,7 @@ from datetime import datetime
 
 from blackjack import Game
 from sql import BlackjackSQL
-from parsers import meta_args
+from parsers import meta_args, cmd_parser
 
 
 try:
