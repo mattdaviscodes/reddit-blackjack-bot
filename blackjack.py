@@ -39,7 +39,7 @@ class Game(object):
 
     def player_stay(self):
         self.player_stays = True
-        self.check_game()
+        self.dealer_play()
 
     def can_double_down(self):
         if len(self.player_hand.cards) == 2:

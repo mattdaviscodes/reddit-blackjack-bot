@@ -71,7 +71,6 @@ class Bot(object):
                 logging.info('%s stays', user.name)
                 if user.game:
                     user.game.player_stay()
-                    user.game.dealer_play()
                 else:
                     logging.info('%s invalid stay', user.name)
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
