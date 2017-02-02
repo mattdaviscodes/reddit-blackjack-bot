@@ -80,7 +80,7 @@ class BlackjackSQL(object):
 
     def charge_user(self, user):
         self.cursor.execute('UPDATE users SET bankroll=? where user_id=?',
-                            (user.bankroll - user.game.bet, user.user_id))
+                            (user.bankroll - user.game.original_bet, user.user_id))
         self.sql.commit()
 
 

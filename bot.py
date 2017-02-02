@@ -77,6 +77,7 @@ class Bot(object):
             if 'double down' in mention.body.lower():
                 logging.info('%s doubles down', user.name)
                 if user.game and user.game.can_double_down():
+                    self.sql.charge_user(user)
                     user.game.player_double_down()
                 else:
                     logging.info('%s invalid double down', user.name)
