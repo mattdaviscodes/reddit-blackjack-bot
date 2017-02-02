@@ -14,3 +14,12 @@ cmd_parser.add_argument('-dd', '--doubledown', '--double', dest='double_down', a
 cmd_parser.add_argument('-sp', '--split', action='store_true', help='issue a split command - CURRENTLY INOPERABLE')
 cmd_parser.add_argument('--history', action='store_true', help='display user hand history - CURRENTLY INOPERABLE')
 cmd_parser.add_argument('--highscores', '--leaderboard', dest='high_scores', action='store_true', help='display the highest scoring users')
+
+# Leaving this here for reference.
+# Can use something like this (maybe subclassing ArgumentParser)
+# to allow for a quick bool check if any valid commands were issued
+#
+# valid, invalid = cmd_parser.parse_known_args('some text without any valid commands')
+# for k,v in valid.__dict__.iteritems():
+#     if v:
+#         print k
