@@ -4,12 +4,12 @@ import sqlite3
 import sys
 import time
 import traceback
-import argparse
-
 from datetime import datetime
 
 from blackjack import Game
 from sql import BlackjackSQL
+from parsers import meta_args
+
 
 try:
     import config
@@ -18,8 +18,21 @@ except ImportError:
     pass
 
 import logging
-
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
+# Should create a custom logger and substitute it with all praw replies
+# Doesn't work, and I don't know why. Leaving it for now,
+# but will likely delete later
+if meta_args.test:
+    # Create custom logger to overwrite external communications
+    testmode = logging.getLogger('TestMode')
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(name)s - %(asctime)s\n%(message)s')
+    handler.setFormatter(formatter)
+    testmode.addHandler(handler)
+
+    # Replace all reddit responses with logs to new custom logger
+    praw.models.Submission.reply = testmode.warn
 
 
 class Bot(object):
@@ -30,6 +43,11 @@ class Bot(object):
     def parse_mentions(self):
         mentions = list(self.reddit.inbox.unread())
         for mention in mentions:
+
+            # Only allow actions on posts by me in test mode
+            if meta_args.test and mention.author.name != 'Davism72':
+                continue
+
             user = sql.get_user(mention.author.name)
             if 'deal me in' in mention.body.lower():
                 if not user.game:
@@ -59,7 +77,6 @@ class Bot(object):
                     self.generate_error_message(mention, "Invalid action - Stay not allowed without active game")
             if user.game:
                 mention.reply(self.generate_reply(user.game))
-                # print(self.generate_reply(user.game))
                 self.sql.store_hand_state(user)
                 if user.game.game_complete:
                     logging.info('Game complete. User: %s - Game ID: %s', user.name, user.game.game_id)
@@ -81,7 +98,6 @@ class Bot(object):
 
     def generate_error_message(self, mention, msg):
         mention.reply(msg)
-        # print(msg)
         mention.mark_read()
 
     def generate_hand_ascii_art(self, hand, dealer=False, game_complete=False):
