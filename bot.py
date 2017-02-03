@@ -96,6 +96,13 @@ class Bot(object):
                 else:
                     logging.info('%s invalid double down', user.name)
                     self.generate_error_message(mention, "Invalid action - Double down not allowed in game state")
+            elif commands.recharge:
+                logging.info('%s recharge credits', user.name)
+                if user.bankroll < 500:
+                    self.sql.recharge_credits(user)
+                    self.generate_error_message(mention, "Credits recharged - Bankroll = 500")
+                else:
+                    self.generate_error_message(mention, "Invalid action - Must have less thatn 500 credits to recharge")
             elif commands.high_scores:
                 self.generate_error_message(mention,
                                             "Invalid action - High scores function not yet implemented. Sorry!")

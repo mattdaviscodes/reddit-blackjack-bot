@@ -88,6 +88,11 @@ class BlackjackSQL(object):
         # Make sure to update the User model to avoid problems with double downs
         user.bankroll -= user.game.original_bet
 
+    def recharge_credits(self, user):
+        self.cursor.execute('UPDATE users SET bankroll=? where user_id=?', 500, user.user_id)
+        self.sql.commit()
+        user.bankroll = 500
+
 
 class User(object):
     def __init__(self, user_id, name, bankroll, game=None):
