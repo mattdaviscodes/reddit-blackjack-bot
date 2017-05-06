@@ -4,6 +4,7 @@ import sqlite3
 import sys
 import time
 import traceback
+import re
 
 from datetime import datetime
 
@@ -41,14 +42,14 @@ class Bot(object):
                     self.generate_error_message(mention, "Invalid action - user already has game active")
             # Write logic for variable bets here
             # Need to find "bet" in string, then parse out the following int
-            if 'hit' in mention.body.lower():
+            if re.match(r"\bhit\b", mention.body.lower()):
                 if user.game and user.game.can_hit():
                     logging.info('%s hits', user.name)
                     user.game.player_hit()
                 else:
                     logging.info('%s invalid hit', user.name)
                     self.generate_error_message(mention, "Invalid action - Hit not allowed in game state")
-            if 'stay' in mention.body.lower():
+            if re.match(r"\bstay\b", mention.body.lower()):
                 logging.info('%s stays', user.name)
                 if user.game:
                     user.game.player_stay()
