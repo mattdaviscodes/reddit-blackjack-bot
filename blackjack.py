@@ -39,6 +39,10 @@ class Game(object):
         self.player_hand.cards.append(self.deck.pop())
         self.check_game()
 
+    def can_stay(self):
+        # Superfluous for now. Can write logic here if we actually need to check this
+        return True
+
     def player_stay(self):
         self.player_stays = True
         self.dealer_play()
@@ -122,6 +126,9 @@ class Game(object):
             self.payout = 0
             self.outcome = "player busts"
             self.game_complete = True
+
+    def is_complete(self):
+        return True if self.game_complete else False
 
 
 class Hand(object):

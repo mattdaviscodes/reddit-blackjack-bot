@@ -1,21 +1,23 @@
-GLOSSARY
+IF USER SUBMITTED VALID COMMAND:
 
- - SUMMON: A post, comment, or reply from a user of Reddit which triggers a reaction from the bot.
- - PLAYER: A Reddit user engaged in a game of blackjack with the bot.
- - DEALER: A piece of the bot containing the logic for executing a game of blackjack. Can be used synonomously with "bot".
+1. Get user
+	1a. Create user first, if needed
+2. Get users's current game, if any
 
-=============
+3. If --bet, but no --deal
+	ERROR: Must use --deal to deal a game, --bet is optional
+4. If --deal
+	If user has active game:
+		ERROR cannot deal when game already active
+	Else:
+		If --bet:
+			Deal new game with custom bet
+		Else:
+			Deal new game with default bet
+5. If --hit
+	If hit allowed:
+		Deal hit
+	Else:
+		ERROR hit not allowed
 
-The Reddit Blackjack Bot is a constantly-running program which scans Reddit for SUMMONS and responds to them by
-conducting a game of blackjack between the PLAYER and the DEALER.
-
-The Reddit Blackjack Bot is a piece of software that scans Reddit for summons -- various pieces of language that the bot
-is trained to look for and which elicit a res
-
-
-
-Comet
-Hand soap
-Sponges
-Smaller gloves
-Carpet cleaner
+6 and 7. Same as hit, but for stay and double down

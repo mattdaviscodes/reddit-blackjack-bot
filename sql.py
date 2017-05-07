@@ -101,3 +101,12 @@ class User(object):
         self.bankroll = bankroll
         self.game = game
         self.history = None
+
+    def has_active_game(self):
+        return True if self.game else False
+
+    def can_afford_bet(self, bet):
+        return True if self.bankroll >= bet else False
+
+    def can_recharge_credits(self):
+        return True if self.bankroll <= 500 else False
