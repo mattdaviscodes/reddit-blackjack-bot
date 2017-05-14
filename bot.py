@@ -74,7 +74,7 @@ class Bot(object):
         player_value = 'Player: {}'.format(game.player_hand.get_hand_value())
         player_ascii = self.generate_hand_ascii_art(game.player_hand)
         reply_prompt = 'HIT or STAY' if not game.game_complete else None
-        footer = '^^Made ^^by ^^/u/Davism72. ^^Send ^^feedback!\n^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
+        footer = '^^Source: ^^https://github.com/mattdavis1121/reddit-blackjack-bot'
         return '\n\n'.join(filter(None, [outcome, payout, dealer_value, dealer_ascii, player_value, player_ascii,
                                          reply_prompt, footer]))
 
