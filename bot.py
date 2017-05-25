@@ -21,6 +21,14 @@ import logging
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
 
+### BEGIN GLOBALS ###
+
+BLOCKED_USERS = ['AutoModerator']
+BLOCKED_SUBREDDITS = ['doctorbutts']
+
+### END GLOBALS ###
+
+
 class Bot(object):
     def __init__(self, reddit, sql):
         self.reddit = reddit
@@ -29,6 +37,12 @@ class Bot(object):
     def parse_mentions(self):
         mentions = list(self.reddit.inbox.unread())
         for mention in mentions:
+
+            # Ignore posts by blocked users
+            if mention.author.name in BLOCKED_USERS:
+                mention.mark_read()
+                continue
+
             user = sql.get_user(mention.author.name)
             if 'deal me in' in mention.body.lower():
                 if not user.game:
