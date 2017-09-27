@@ -126,3 +126,9 @@ The same game recorded to standard -- no whitespace, no comments -- looks like t
 ```
 {3.52}|1.1..as.|2.1..6s.|3.1..ac.|0.1...?|1.1..ad.|2.1..5d.|3.1..kd._|0.1..ah.|1.1./..|/1.as/2.ad/|1.1.^.5c.|1.1.^.3c._|1.2.^.2d.|1.2.^.4c.|1.2.^.5h.|1.2.^.8d._|2.1.!.qs._|0.1.%.4h.|0.1.^.6d._|[l/l,p,w]
 ```
+
+## TODO
+- Add Blackjack icon to legend (`$`)
+- Revisit split notation
+- Expand setup block
+    - I'd like to have some sort of unique ID attached to each player so we know who they are. The annotation should show a player's ID as 1 or 2, etc, but I'd like to have some way to link that back to a user of this service.
