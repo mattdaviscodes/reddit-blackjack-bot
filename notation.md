@@ -61,6 +61,29 @@ The main block of the game is recorded via a series of **event blocks**, which a
 
 The results of the hand are listed at the very end in an **outcome block**, enclosed in square brackets `[]`. This is a comma separated list of each players outcome -- win, loss, or push. It may be further subdivided if any of the players split their hand(s).
 
+### Event Level
+Each event in the **event block** is divided into five discrete data points, separated by periods `.`. These are:
+- Actor ID
+    - 0 for dealer
+    - Any positive integer for a player
+- Hand ID
+    - Any positive integer
+    - Usually a 1, but can be greater if player splits hand(s)
+- Action
+    - Hit, Double Down, etc
+    - Things that happen before another card is dealt
+- Card
+- Modifier
+    - Stay, Bust
+    - Thing that happen after card is dealt
+
+Action, Card, and Modifier may be omitted depending on situation. For example,
+when a hand is first being dealt, the players are taking no actions, but they
+receive cards. Or a player may choose to stay with their first two cards, so
+we would record an empty Action and Card block for that event, with Stay in
+the Modifier section.
+
+### Examples
 Example below with comments for clarity. Usually these will be stored with as little whitespace as possible.
 
 ```
