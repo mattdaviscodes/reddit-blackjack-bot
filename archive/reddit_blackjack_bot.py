@@ -1,9 +1,10 @@
-import praw
+import sqlite3
 import sys  # Used only for exiting script
 import time
-import sqlite3
 
-from blackjack import Game
+import praw
+
+from archive.blackjack import Game
 
 try:
     import config
