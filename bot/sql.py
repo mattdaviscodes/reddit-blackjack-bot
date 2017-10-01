@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -23,6 +23,11 @@ SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
 engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
 Base = declarative_base(cls=Base)
 
+user_achievements = Table('user_achievements', Base.metadata,
+    Column('user_id', ForeignKey('users.id'), primary_key=True),
+    Column('achievement_id', ForeignKey('achievements.id'), primary_key=True)
+)
+
 
 class User(Base):
     """Model to represent users.
@@ -34,6 +39,10 @@ class User(Base):
     __tablename__ = 'users'
 
     username = Column(String)
+
+    achievements = relationship('Achievement',
+                                secondary=user_achievements,
+                                back_populates='users')
 
 
 class Game(Base):
@@ -55,7 +64,7 @@ class Game(Base):
     user = relationship('User', back_populates='games')
 
 
-class Achievement:
+class Achievement(Base):
     """Lookup table for player achievements.
 
     Fields:
@@ -70,7 +79,10 @@ class Achievement:
         stayed on <10 and won
         hit on 19> and didn't bust
     """
-    pass
+    __tablename__ = 'achievements'
+
+    name = Column(String, nullable=False)
+    description = Column(String)
 
 
 class UserAchievement:
