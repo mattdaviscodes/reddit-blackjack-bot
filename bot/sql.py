@@ -38,8 +38,10 @@ class User(Base):
     """
     __tablename__ = 'users'
 
-    username = Column(String)
+    username = Column(String, unique=True)
+    credits = Column(Integer)
 
+    games = relationship('Game', back_populates='user')
     achievements = relationship('Achievement',
                                 secondary=user_achievements,
                                 back_populates='users')
@@ -58,6 +60,8 @@ class Game(Base):
     __tablename__ = 'games'
 
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    state = Column(String, nullable=False)
+    bet = Column(Integer, nullable=False)
     started_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     ended_at = Column(DateTime, nullable=True, default=None)
 
@@ -84,16 +88,8 @@ class Achievement(Base):
     name = Column(String, nullable=False)
     description = Column(String)
 
-
-class UserAchievement:
-    """Mapping table -- users to achievements
-
-    Not sure if this is required. If sqlalchemy works the same without Flask
-    as it does with Flask, then all I need is the two tables, and sqlalchemy
-    will take care of the relationship for me.
-    """
-    pass
-
-
+    users = relationship('User',
+                         secondary=user_achievements,
+                         back_populates='achievements')
 
 
