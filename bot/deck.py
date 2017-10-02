@@ -1,19 +1,6 @@
 import random
 
 
-def cards_to_ascii(cards):
-    """Get single ascii string for all cards in hand.
-
-    This method is totally unreadable, but it works. Might want to refactor
-    later to be more developer-friendly.
-
-    :param cards: list of Card objects
-    :return: single-string ascii representation of all cards
-    """
-    ascii = [card.ascii.split('\n') for card in cards]
-    return '\n'.join([' '.join(line) for line in zip(*ascii)])
-
-
 class Card(object):
     """A playing card."""
 

@@ -1,26 +1,122 @@
-from deck import Deck, cards_to_ascii
+from deck import Deck, Card
+
+
+class Hand(object):
+    """A blackjack hand."""
+
+    def __init__(self, *args, **kwargs):
+        self.dealer = kwargs.get('dealer', False)
+        self.cards = []
+        for arg in args:
+            if isinstance(arg, Card):
+                self.cards.append(arg)
+
+    @property
+    def ascii(self):
+        """Get single ascii string for all cards in hand.
+
+        This method is totally unreadable, but it works. Might want to refactor
+        later to be more developer-friendly.
+
+        :return: single-string ascii representation of all cards
+        """
+        ascii = [card.ascii.split('\n') for card in self.cards]
+        return '\n'.join([' '.join(line) for line in zip(*ascii)])
+
+    @property
+    def _raw_value(self):
+        """Get numerical value of hand.
+
+        This method makes no attempt to deal with Aces being valued at
+        1 or 11. The property self.value should almost always be called,
+        as it will try first to devalue any aces if a hand's value is
+        greater than 21.
+        """
+        return sum([card.value for card in self.cards])
+
+    @property
+    def value(self):
+        """Get numerical value of hand. Devalue aces if necessary.
+
+        As aces may either be valued at 1 or 11, this method will attempt
+        to keep the hand's total value below 11 if any aces are present by
+        reducing their value to 1. Even if hand can not be devalued below
+        21, the total value will be returned as an integer.
+
+        :return: Integer value of all cards in hand, after devaluing aces.
+        """
+        while self._raw_value > 21:
+            for card in self.cards:
+                if card.value == 11:
+                    card.value = 1
+                    continue
+            break
+        return self._raw_value
+
+
+class Blackjack(object):
+    """A game of blackjack."""
+
+    def __init__(self):
+        self.deck = Deck()
+        self.player_hands = [Hand()]
+        self.dealer_hand = Hand(dealer=True)
+
+    def deal(self):
+        """Deal a game of blackjack.
+
+        Two cards each for player and dealer, alternating.
+        """
+        for i in xrange(2):
+            for hand in self.player_hands:
+                hand.cards.append(self.deck.deal_one())
+            self.dealer_hand.cards.append(self.deck.deal_one())
+
+    def display(self):
+        """Print state of game including hand values and ascii art."""
+        print "Dealer: {}".format(self.dealer_hand.value)
+        print self.dealer_hand.ascii
+
+        for hand in self.player_hands:
+            print "Player: {}".format(hand.value)
+            print hand.ascii
+
+    def hit(self, hand):
+        """Deal one card to hand.
+
+        Should error checking happen here? i.e. if hand.can_hit(): hit()
+        """
+        hand.cards.append(self.deck.deal_one())
+
+    def split(self, hand):
+        """Split hand into two hands."""
+        card = hand.cards.pop()
+        new_hand = Hand(card)
+        self.player_hands.append(new_hand)
+
 
 if __name__ == '__main__':
-    deck = Deck()
+    blackjack = Blackjack()
+    blackjack.deal()
 
-    player = []
-    dealer = []
-    game_over = False
+    for hand in blackjack.player_hands:
 
-    for _ in xrange(2):
-        player.append(deck.deal_one())
-        dealer.append(deck.deal_one())
+        while hand.value <= 21:
+            blackjack.display()
+            action = raw_input("Hit, Stay, Double, or Split: ")
+            if action.lower() == 'hit':
+                blackjack.hit(hand)
+            elif action.lower() == 'double':
+                blackjack.hit(hand)
+                break
+            elif action.lower() == 'split':
+                blackjack.split(hand)
+            elif action.lower() == 'stay':
+                break
+            else:
+                continue
 
-    while not game_over:
-        print cards_to_ascii(dealer)
-        print cards_to_ascii(player)
+    while blackjack.dealer_hand.value < 17:
+        blackjack.hit(blackjack.dealer_hand)
 
-        action = raw_input("""What would you like to do?
-            1: Hit
-            2: Stay
-            Input: """)
-
-        if action == str(1):
-            player.append(deck.deal_one())
-        elif action == str(2):
-            game_over = True
+    blackjack.display()
