@@ -2,6 +2,9 @@ from deck import Deck, Card
 from exceptions import NotEnoughCredits
 
 
+PLAYER_ID = 1
+DEALER_ID = 0
+
 class Hand(object):
     """A blackjack hand."""
 
@@ -58,7 +61,7 @@ class Hand(object):
 class Blackjack(object):
     """A game of blackjack."""
 
-    def __init__(self, user, bet, db_session):
+    def __init__(self, user, bet, db_session, state=None):
 
         if user.credits < bet:
             raise NotEnoughCredits("Sorry, you can't afford to bet that much.")
@@ -66,9 +69,16 @@ class Blackjack(object):
         self.user = user
         self.bet = bet
         self.db_session = db_session
+        self.state = state or self._init_state()
         self.deck = Deck()
         self.player_hands = [Hand()]
         self.dealer_hand = Hand(dealer=True)
+
+    def _init_state(self):
+        return "{1.51}"
+
+    def _register_state_change(self):
+        pass
 
     def charge_user(self):
         """Reduces user.credits by the amount bet on hand."""
