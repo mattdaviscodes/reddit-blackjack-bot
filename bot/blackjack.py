@@ -72,19 +72,16 @@ class Blackjack(object):
 
     def charge_user(self):
         """Reduces user.credits by the amount bet on hand."""
-        self.user.credits -= self.bet
-        self.db_session.add(self.user)
-        self.db_session.commit()
+        self.user.charge(self.bet)
 
     def pay_user(self):
         """Increases user.credits by double bet amount if user won."""
         if not self.player_hands[0].value > 21:
             if self.dealer_hand.value > 21 or self.player_hands[0].value > self.dealer_hand.value:
                 self.user.credits += self.bet * 2
+                self.user.pay(self.bet * 2)
             elif self.player_hands[0].value == self.dealer_hand.value:
-                self.user.credits += self.bet
-            self.db_session.add(self.user)
-            self.db_session.commit()
+                self.user.pay(self.bet)
 
     def deal(self):
         """Deal a game of blackjack.
