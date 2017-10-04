@@ -1,5 +1,6 @@
+from bot import Session
 from bot.blackjack import Blackjack
-from bot.sql import User, Game, Session
+from bot.sql import User, Game
 
 
 if __name__ == '__main__':

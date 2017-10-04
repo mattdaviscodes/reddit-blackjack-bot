@@ -1,9 +1,9 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
 
 
 class Base(object):
@@ -19,10 +19,6 @@ class Base(object):
         return "<{}(id={})>".format(self.__class__.__name__, self.id)
 
 
-SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
-Session = sessionmaker()
-Session.configure(bind=engine)
 Base = declarative_base(cls=Base)
 
 user_achievements = Table('user_achievements', Base.metadata,
