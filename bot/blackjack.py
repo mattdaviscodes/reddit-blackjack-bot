@@ -8,12 +8,11 @@ DEALER_ID = 0
 class Hand(object):
     """A blackjack hand."""
 
-    def __init__(self, *args, **kwargs):
-        self.dealer = kwargs.get('dealer', False)
-        self.cards = []
-        for arg in args:
-            if isinstance(arg, Card):
-                self.cards.append(arg)
+    def __init__(self, cards=None, dealer=False):
+        self.dealer = dealer
+        self.cards = cards
+        if self.cards is None:
+            self.cards = []
 
     @property
     def ascii(self):
@@ -121,7 +120,7 @@ class Blackjack(object):
     def split(self, hand):
         """Split hand into two hands. Deal one card to each."""
         card = hand.cards.pop()
-        new_hand = Hand(card)
+        new_hand = Hand(cards=[card])
         hand.cards.append(self.deck.deal_one())
         new_hand.cards.append(self.deck.deal_one())
         self.player_hands.append(new_hand)
