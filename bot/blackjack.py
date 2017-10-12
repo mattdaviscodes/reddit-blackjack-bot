@@ -119,9 +119,11 @@ class Blackjack(object):
         hand.cards.append(self.deck.deal_one())
 
     def split(self, hand):
-        """Split hand into two hands."""
+        """Split hand into two hands. Deal one card to each."""
         card = hand.cards.pop()
         new_hand = Hand(card)
+        hand.cards.append(self.deck.deal_one())
+        new_hand.cards.append(self.deck.deal_one())
         self.player_hands.append(new_hand)
 
 
