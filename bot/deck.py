@@ -11,8 +11,12 @@ class Card(object):
 
     @property
     def ascii(self):
-        template = """ __ \n|  |\n|{}{}|\n|__|"""
-        return template.format(str(self.rank).upper(), self.suit.upper())
+        template = """ __ \n|  |\n|{}|\n|__|"""
+        return template.format(self.id.upper())
+
+    @property
+    def id(self):
+        return "{}{}".format(str(self.rank), self.suit)
 
 
 class Deck(object):
