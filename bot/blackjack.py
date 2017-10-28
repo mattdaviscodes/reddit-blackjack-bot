@@ -62,11 +62,28 @@ class Hand(object):
             break
         return self._raw_value
 
+    @property
+    def json(self):
+        return {
+            'dealer': self.dealer,
+            'active': self.active,
+            'cards': [card.json for card in self.cards]
+        }
+
+    @classmethod
+    def from_json(cls, json):
+        return cls(
+            cards=[Card.from_json(card) for card in json.get('cards')],
+            dealer=json.get('dealer'),
+            active=json.get('active')
+        )
+
 
 class Blackjack(object):
     """A game of blackjack."""
 
-    def __init__(self, user, bet, db_session, state=None):
+    def __init__(self, user, bet, db_session=None,
+                 deck=None, player_hands=None, dealer_hand=None):
 
         if user.credits < bet:
             raise NotEnoughCredits("Sorry, you can't afford to bet that much.")
@@ -74,16 +91,33 @@ class Blackjack(object):
         self.user = user
         self.bet = bet
         self.db_session = db_session
-        self.state = state or self._init_state()
-        self.deck = Deck()
-        self.player_hands = [Hand()]
-        self.dealer_hand = Hand(dealer=True, active=False)
+        self.deck = deck
+        if not deck:
+            self.deck = Deck()
+        self.player_hands = player_hands
+        if not player_hands:
+            self.player_hands = [Hand()]
+        self.dealer_hand = dealer_hand
+        if not dealer_hand:
+            self.dealer_hand = Hand(dealer=True, active=False)
 
-    def _init_state(self):
-        return "{1.51}"
+    @property
+    def json(self):
+        return {
+            'bet': self.bet,
+            'deck': self.deck.json,
+            'player_hands': [hand.json for hand in self.player_hands],
+            'dealer_hand': self.dealer_hand.json
+        }
 
-    def _register_state_change(self):
-        pass
+    @classmethod
+    def from_json(cls, json):
+        return cls(
+            bet=json.get('bet'),
+            deck=Deck.from_json(json.get('deck')),
+            player_hands=[Hand.from_json(hand) for hand in json.get('player_hands')],
+            dealer_hand=Hand.from_json(json.get('dealer_hand'))
+        )
 
     def charge_user(self):
         """Reduces user.credits by the amount bet on hand."""

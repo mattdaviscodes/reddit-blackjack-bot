@@ -18,70 +18,92 @@ class Card(object):
     def id(self):
         return "{}{}".format(str(self.rank), self.suit)
 
+    @property
+    def json(self):
+        """Dictionary representation of card.
+
+        To be later stored as JSON string in database."""
+        return {
+            'rank': self.rank,
+            'suit': self.suit,
+            'value': self.value
+        }
+
+    @classmethod
+    def from_json(cls, json):
+        """Get Card object from JSON string."""
+        return cls(json.get('rank'), json.get('suit'), json.get('value'))
+
 
 class Deck(object):
     """A deck of playing cards."""
 
-    def __init__(self):
-        self.cards = [
-            Card('a', 's', 11),
-            Card('2', 's', 2),
-            Card('3', 's', 3),
-            Card('4', 's', 4),
-            Card('5', 's', 5),
-            Card('6', 's', 6),
-            Card('7', 's', 7),
-            Card('8', 's', 8),
-            Card('9', 's', 9),
-            Card('t', 's', 10),
-            Card('j', 's', 10),
-            Card('q', 's', 10),
-            Card('k', 's', 10),
-            Card('a', 'd', 11),
-            Card('2', 'd', 2),
-            Card('3', 'd', 3),
-            Card('4', 'd', 4),
-            Card('5', 'd', 5),
-            Card('6', 'd', 6),
-            Card('7', 'd', 7),
-            Card('8', 'd', 8),
-            Card('9', 'd', 9),
-            Card('t', 'd', 10),
-            Card('j', 'd', 10),
-            Card('q', 'd', 10),
-            Card('k', 'd', 10),
-            Card('a', 'c', 11),
-            Card('2', 'c', 2),
-            Card('3', 'c', 3),
-            Card('4', 'c', 4),
-            Card('5', 'c', 5),
-            Card('6', 'c', 6),
-            Card('7', 'c', 7),
-            Card('8', 'c', 8),
-            Card('9', 'c', 9),
-            Card('t', 'c', 10),
-            Card('j', 'c', 10),
-            Card('q', 'c', 10),
-            Card('k', 'c', 10),
-            Card('a', 'h', 11),
-            Card('2', 'h', 2),
-            Card('3', 'h', 3),
-            Card('4', 'h', 4),
-            Card('5', 'h', 5),
-            Card('6', 'h', 6),
-            Card('7', 'h', 7),
-            Card('8', 'h', 8),
-            Card('9', 'h', 9),
-            Card('t', 'h', 10),
-            Card('j', 'h', 10),
-            Card('q', 'h', 10),
-            Card('k', 'h', 10),
-        ]
-        random.shuffle(self.cards)
+    def __init__(self, cards=None):
+        self.cards = cards
+        if not cards:
+            self.cards = [
+                Card('a', 's', 11),
+                Card('2', 's', 2),
+                Card('3', 's', 3),
+                Card('4', 's', 4),
+                Card('5', 's', 5),
+                Card('6', 's', 6),
+                Card('7', 's', 7),
+                Card('8', 's', 8),
+                Card('9', 's', 9),
+                Card('t', 's', 10),
+                Card('j', 's', 10),
+                Card('q', 's', 10),
+                Card('k', 's', 10),
+                Card('a', 'd', 11),
+                Card('2', 'd', 2),
+                Card('3', 'd', 3),
+                Card('4', 'd', 4),
+                Card('5', 'd', 5),
+                Card('6', 'd', 6),
+                Card('7', 'd', 7),
+                Card('8', 'd', 8),
+                Card('9', 'd', 9),
+                Card('t', 'd', 10),
+                Card('j', 'd', 10),
+                Card('q', 'd', 10),
+                Card('k', 'd', 10),
+                Card('a', 'c', 11),
+                Card('2', 'c', 2),
+                Card('3', 'c', 3),
+                Card('4', 'c', 4),
+                Card('5', 'c', 5),
+                Card('6', 'c', 6),
+                Card('7', 'c', 7),
+                Card('8', 'c', 8),
+                Card('9', 'c', 9),
+                Card('t', 'c', 10),
+                Card('j', 'c', 10),
+                Card('q', 'c', 10),
+                Card('k', 'c', 10),
+                Card('a', 'h', 11),
+                Card('2', 'h', 2),
+                Card('3', 'h', 3),
+                Card('4', 'h', 4),
+                Card('5', 'h', 5),
+                Card('6', 'h', 6),
+                Card('7', 'h', 7),
+                Card('8', 'h', 8),
+                Card('9', 'h', 9),
+                Card('t', 'h', 10),
+                Card('j', 'h', 10),
+                Card('q', 'h', 10),
+                Card('k', 'h', 10),
+            ]
+            random.shuffle(self.cards)
 
     def deal_one(self):
         return self.cards.pop()
 
+    @property
+    def json(self):
+        return {'cards': [card.json for card in self.cards]}
+
     @classmethod
-    def from_notation(cls):
-        pass
+    def from_json(cls, json):
+        return cls(cards=[Card.from_json(card) for card in json.get('cards')])
