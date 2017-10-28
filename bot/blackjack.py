@@ -1,4 +1,5 @@
 from deck import Deck, Card
+from util import active_marker, merge_ascii
 from exceptions import NotEnoughCredits
 
 
@@ -8,23 +9,28 @@ DEALER_ID = 0
 class Hand(object):
     """A blackjack hand."""
 
-    def __init__(self, cards=None, dealer=False):
+    def __init__(self, cards=None, dealer=False, active=True):
         self.dealer = dealer
+        self.active = active
         self.cards = cards
         if self.cards is None:
             self.cards = []
 
     @property
+    def is_active(self):
+        """Flag indicating active hand boolean."""
+        return self.active
+
+    @property
     def ascii(self):
         """Get single ascii string for all cards in hand.
 
-        This method is totally unreadable, but it works. Might want to refactor
-        later to be more developer-friendly.
-
         :return: single-string ascii representation of all cards
         """
-        ascii = [card.ascii.split('\n') for card in self.cards]
-        return '\n'.join([' '.join(line) for line in zip(*ascii)])
+        ascii_list = [card.ascii for card in self.cards]
+        if self.is_active:
+            ascii_list += [active_marker()]
+        return merge_ascii(ascii_list=ascii_list)
 
     @property
     def _raw_value(self):
@@ -71,7 +77,7 @@ class Blackjack(object):
         self.state = state or self._init_state()
         self.deck = Deck()
         self.player_hands = [Hand()]
-        self.dealer_hand = Hand(dealer=True)
+        self.dealer_hand = Hand(dealer=True, active=False)
 
     def _init_state(self):
         return "{1.51}"
@@ -120,7 +126,7 @@ class Blackjack(object):
     def split(self, hand):
         """Split hand into two hands. Deal one card to each."""
         card = hand.cards.pop()
-        new_hand = Hand(cards=[card])
+        new_hand = Hand(cards=[card], active=False)
         hand.cards.append(self.deck.deal_one())
         new_hand.cards.append(self.deck.deal_one())
         self.player_hands.append(new_hand)
@@ -131,6 +137,8 @@ if __name__ == '__main__':
     blackjack.deal()
 
     for hand in blackjack.player_hands:
+
+        hand.active = True
 
         while hand.value <= 21:
             blackjack.display()
@@ -146,6 +154,8 @@ if __name__ == '__main__':
                 break
             else:
                 continue
+
+        hand.active = False
 
     while blackjack.dealer_hand.value < 17:
         blackjack.hit(blackjack.dealer_hand)

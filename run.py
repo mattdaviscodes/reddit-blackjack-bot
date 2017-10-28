@@ -19,6 +19,8 @@ if __name__ == '__main__':
 
         for hand in blackjack.player_hands:
 
+            hand.active = True
+
             while hand.value <= 21:
                 blackjack.display()
                 action = raw_input("Hit, Stay, Double, or Split: ")
@@ -33,6 +35,8 @@ if __name__ == '__main__':
                     break
                 else:
                     continue
+
+            hand.active = False
 
         while blackjack.dealer_hand.value < 17:
             blackjack.hit(blackjack.dealer_hand)
