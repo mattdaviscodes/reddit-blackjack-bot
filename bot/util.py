@@ -1,8 +1,10 @@
 """Helper functions for blackjack.py."""
 
+
 def active_marker():
     """Return an ascii arrow to indicate active hand."""
     return "\n\n<-\n"
+
 
 def merge_ascii(ascii_list=None, *args):
     """Merge a series of multi-line ascii art units into a single unit.
