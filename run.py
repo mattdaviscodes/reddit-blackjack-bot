@@ -17,6 +17,9 @@ if __name__ == '__main__':
         blackjack.charge_user()
         blackjack.deal()
 
+        game = Game(user_id=user.id, json=blackjack.json, bet=blackjack.bet)
+        game.save()
+
         for hand in blackjack.player_hands:
 
             hand.active = True
@@ -26,12 +29,16 @@ if __name__ == '__main__':
                 action = raw_input("Hit, Stay, Double, or Split: ")
                 if action.lower() == 'hit':
                     blackjack.hit(hand)
+                    game.update(json=blackjack.json)
                 elif action.lower() == 'double':
                     blackjack.hit(hand)
+                    game.update(json=blackjack.json, bet=blackjack.bet)
                     break
                 elif action.lower() == 'split':
                     blackjack.split(hand)
+                    game.update(json=blackjack.json, bet=blackjack.bet)
                 elif action.lower() == 'stay':
+                    game.update(json=blackjack.json)
                     break
                 else:
                     continue
