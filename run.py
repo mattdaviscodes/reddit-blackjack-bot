@@ -1,4 +1,5 @@
 from bot import Session
+from bot.bot import RedditBot
 from bot.blackjack import Blackjack
 from bot.sql import User, Game
 
