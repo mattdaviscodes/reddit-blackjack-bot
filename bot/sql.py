@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -104,7 +104,7 @@ class Game(Base):
     __tablename__ = 'games'
 
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    state = Column(String, nullable=False)
+    json = Column(JSON, nullable=False)
     bet = Column(Integer, nullable=False)
     started_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     ended_at = Column(DateTime, nullable=True, default=None)
